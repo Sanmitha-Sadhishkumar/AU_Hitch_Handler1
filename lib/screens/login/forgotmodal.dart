@@ -1,6 +1,6 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hitch_handler/screens/components/utils/customdialog.dart';
 import '../../args_class.dart';
 import 'reset_password.dart';
 import '../../constants.dart';
@@ -40,58 +40,56 @@ class ForgotModalFormState extends State<ForgotModalForm> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AdaptiveTheme.of(context).brightness == Brightness.dark;
     Size size = MediaQuery.of(context).size;
     return Form(
       key: _formKey,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 30.w),
+        padding: EdgeInsets.symmetric(horizontal: size.width * 0.1),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: 40.h,
+              height: size.height * 0.06,
               child: Center(
                 child: Container(
                   height: 5,
-                  width: 50.w,
+                  width: 50,
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? kTextColor.withOpacity(0.5)
-                        : kLTextColor.withOpacity(0.8),
+                    color: Colors.grey.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
             ),
             SizedBox(
-              height: 10.h,
+              height: size.height * 0.025,
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30.w),
-              child: FittedBox(
-                child: Text(
-                  "Forgot Password ?",
-                  textAlign: TextAlign.center,
-                  style:
-                      AdaptiveTheme.of(context).theme.textTheme.headlineLarge,
+            const FittedBox(
+              child: Text(
+                "Forgot Password ?",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: kTextColor,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                  fontSize: 28,
                 ),
               ),
             ),
             SizedBox(
-              height: 15.h,
+              height: size.height * 0.03,
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: FittedBox(
-                child: Text(
-                  "Enter registered Email ID / Mobile Number.",
-                  style: AdaptiveTheme.of(context).theme.textTheme.titleSmall,
+            FittedBox(
+              child: Text(
+                "Enter registered Email ID / Mobile Number.",
+                style: TextStyle(
+                  color: kTextColor.withOpacity(0.7),
+                  letterSpacing: 0.6,
                 ),
               ),
             ),
             SizedBox(
-              height: 40.h,
+              height: size.height * 0.05,
             ),
             CustomMultiField(
               controller: myTextFieldController,
@@ -113,19 +111,23 @@ class ForgotModalFormState extends State<ForgotModalForm> {
                 TextInputType.number,
               ],
             ),
+            SizedBox(
+              height: size.height * 0.010,
+            ),
             CustomSubmitButton(
               size: size,
-              bgcolor: isDark ? kPrimaryColor : kLPrimaryColor,
+              bgcolor: kPrimaryColor,
               msg: "Send Code",
-              fsize: 20,
-              width: 2.5,
+              fsize: 18,
+              width: 2,
               press: () {
                 WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
                   print("____Forgot Form Valid!");
-
-                  UserData user = UserData(
+                  resetPassword();
+                  //reset password link has been sent. No need for OTP verfiction.
+                  /*UserData user = UserData(
                     myTextFieldController.text,
                     '0000000000', //Todo UserData
                     '2021000000', //Todo UserData
@@ -155,15 +157,21 @@ class ForgotModalFormState extends State<ForgotModalForm> {
                   print(myTextFieldController.text);
                 } else {
                   print("____Forgot Form Error!");
-                }
-              }, //Todo_Navigation
+                }*/
+
+                };
+              }//Todo_Navigation
             ),
             SizedBox(
-              height: 30.h,
+              height: size.height * 0.05,
             ),
           ],
         ),
       ),
     );
+  }
+  Future resetPassword() async{
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: myTextFieldController.text.trim());
+    //showCustomSnackBar("Password Resset Email sent", "ok", () { });
   }
 }
